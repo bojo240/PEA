@@ -4,11 +4,7 @@
 
 int shortestdistance=INT_MAX;
 std::string shortestpath= "";
-void recurency(int, int, int*, int**, std::string, int, int, int);
-
-
-//WYPIERDOLIC copyseen[i]=licznik; TAK, ZEBY ZAZNACZALO TO DOPIERO PO WEJSCIU W MIASTO!!!!!!!!!!!! ZACZNIE DZIALAC NA 100%!
-
+void recurency(int, int, bool*, int**, std::string, int, int, bool);
 
 int  main()
 {
@@ -33,50 +29,48 @@ int  main()
         for(int j=0;j<cityamount;++j)
             plik>>a[i][j];
     plik.close();
-    int* c = new int[cityamount]; //tworze tablice z miastami ktore odwiedzilem
+    bool* c = new bool[cityamount]; //tworze tablice z miastami ktore odwiedzilem
     for (int i=0;i<cityamount;++i)
-        c[i]=0;
-    recurency(cityamount, 0, c, a, "", 0, 0, 0);
+        c[i]=false;
+    recurency(cityamount, 0, c, a, "", 0, 0, true);
     std::cout<<"Najkrotsza droga przez wszystkie miasta to: "<<shortestpath<<'\n';
     std::cout<<"Jej calkowity dystans wynosi: "<<shortestdistance;
 }
-//musze sobie wyswietlac ta tablice booli na kazdym poziomie, zeby wiedziec czy on sie poprawnie wraca
-//moze byc po prostu problem z tymi zjebanymi indexami itd, a nie z tym czy sie wraca czy nie.
-//NIECH TABLICA BEDZIE PO PROSTU KOLEJNOSCIA, NP 1432, 1324, 1234
 
-void recurency(int cityamount, int currentdistance, int seen[], int**distances, std::string path, int present, int previous, int licznik)
+//jako argument rekurencji bool init = true, potem juz bylby false, ktory by zrobil co powinien na pierwszym wywolaniu rekurencjki?
+
+void recurency(int cityamount, int currentdistance, bool seen[], int**distances, std::string path, int present, int previous, bool init)
 {
-    int* copyseen = new int[cityamount];//kopiuje tablice przekazana jako argument, inaczej operowalbym caly czas na oryginalnych danych
+    bool* copyseen = new bool[cityamount];//kopiuje tablice przekazana jako argument, inaczej operowalbym caly czas na oryginalnych danych
     for(int i=0;i<cityamount;++i)
         copyseen[i]=seen[i];//w tym momencie wiem juz gdzie bylem, a gdzie musze wejsc
     for(int j=0;j<cityamount;++j)
         std::cout<<copyseen[j];
     std::cout<<"\n\n\n";
-    for(int i=0;i<cityamount;++i)
-        if(copyseen[i]==0)//iterator i przechowuje pierwsze nieodwiedzone miasto, o ile jeszcze takowe istnieje
-            copyseen[i]=licznik; //zaznaczam, ze miasto w ktorym jestem jest juz odwiedzone
-    for(int i=0;i<cityamount;++i)//sprawdzam czy jest jeszcze jakies nieodwiedzone miasto
-        if(copyseen[i]==0)//iterator i przechowuje pierwsze nieodwiedzone miasto, o ile jeszcze takowe istnieje
+    int g=0;
+    if(!init)
+        for(g=0;g<cityamount;++g)
+            if(copyseen[g]==0)//iterator i przechowuje pierwsze nieodwiedzone miasto, o ile jeszcze takowe istnieje
+                copyseen[g]=true; //zaznaczam, ze miasto w ktorym jestem jest juz odwiedzone
+    for(int i=g;i<cityamount;++i)//sprawdzam czy jest jeszcze jakies nieodwiedzone miasto
+        if(copyseen[i]==false)//iterator i przechowuje pierwsze nieodwiedzone miasto, o ile jeszcze takowe istnieje
         {
-            ++licznik;
+            for(int j=0;j<cityamount;++j)
+                std::cout<<copyseen[j];
             currentdistance+=distances[present][i]; // dodaje odleglosc z miasta obecnego do nastepnego
             previous = present;//w kolejnym poziomie rekurencji, poprzednie miasto bedzie obecnym
             present = i; // a miasto do ktorego bede szedl bedzie w kolejnym poziomie rekurencji obecnym
             path += 'A'+present; // dodaje obecne miasto do listy odwiedzonych juz miast
             std::cout<<"\n\n";
-            recurency(cityamount, currentdistance, copyseen, distances, path, present, previous, licznik); //wejdz do kolejnego miasta
+            recurency(cityamount, currentdistance, copyseen, distances, path, present, previous, false); //wejdz do kolejnego miasta
         }
-    if(path.length()==cityamount)//jezeli jestes na najnizszym z mozliwych poziomow rekurencji
+        //g przechowuje ostatnie miasto, trzeba je dodac i dodac pierwsze miasto, potem wyjsc z rekurencji.
+    if(path.length()==(cityamount-1))//jezeli jestes na najnizszym z mozliwych poziomow rekurencji
     {
-        int temp = static_cast<int>('A' - path[0]);
-        int i=0;
-        for(i=0;i<cityamount;++i)//sprawdzam czy jest jeszcze jakies nieodwiedzone miasto
-            if(copyseen[i]==0)//iterator i przechowuje pierwsze nieodwiedzone miasto, o ile jeszcze takowe istnieje
-                break;
-        currentdistance+=distances[i-1][temp];//wroc z ostatniego miasta w ktorym byles do pierwszego miasta
-        char a = path[0];
-        path += a;
-
+        path += static_cast<char>('A'+g);           //dodaje ostatnie miasto
+        currentdistance += distances[present][g];
+        path += path[0];                            //dodaje pierwsze miasto do sciezki
+        currentdistance += distances[g][static_cast<int>(path[0] - 'A')];
         if(currentdistance<shortestdistance) //jezeli ta sciezka jest krotsza od najkrotszej dotychczas znalezionej, zamien wartosc najkrotszej sciezki na krotsza
         {
             shortestdistance=currentdistance;
@@ -86,6 +80,26 @@ void recurency(int cityamount, int currentdistance, int seen[], int**distances, 
     }
     delete[] copyseen;
 }
+
+//    if(path.length()==cityamount)//jezeli jestes na najnizszym z mozliwych poziomow rekurencji
+//    {
+//        int temp = static_cast<int>('A' - path[0]);
+//        int i=0;
+//        for(i=0;i<cityamount;++i)//sprawdzam czy jest jeszcze jakies nieodwiedzone miasto
+//            if(copyseen[i]==false)//iterator i przechowuje pierwsze nieodwiedzone miasto, o ile jeszcze takowe istnieje
+//                break;
+//        currentdistance+=distances[i-1][temp];//wroc z ostatniego miasta w ktorym byles do pierwszego miasta
+//        char a = path[0];
+//        path += a;
+//
+//        if(currentdistance<shortestdistance) //jezeli ta sciezka jest krotsza od najkrotszej dotychczas znalezionej, zamien wartosc najkrotszej sciezki na krotsza
+//        {
+//            shortestdistance=currentdistance;
+//            shortestpath=path;
+//        }
+//        std::cout<<"\nNajkrotsza sciezka w tym momencie to "<<path<<'\n';
+//    }
+//    delete[] copyseen;
 
 //Pierwszy poziom rekurencji jeest nie wazny, bo ta sama trase sprawdzalbym wielokrotnie.
 //przy wchodzeniu do kolejnego poziomu rekurencji dodaje do odwiedzonych, a po wyjsciu z niej, usuwam to.
