@@ -46,7 +46,9 @@ void recurency(int currentdistance, bool seen[], std::string path, int present, 
     bool* copyseen = new bool[cityamount];//kopiuje tablice przekazana jako argument, inaczej operowalbym caly czas na oryginalnych danych
     for(int i=0;i<cityamount;++i)
         copyseen[i]=seen[i];//w tym momencie wiem juz gdzie bylem, a gdzie musze wejsc
-    std::string copypath = new std::string;
+
+ ````-
+ +  `    std::string copypath = new std::string;
     copypath = path;
     int g=0;
     if(init==false)
