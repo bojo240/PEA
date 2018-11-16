@@ -5,8 +5,12 @@
 	<iostream>
 	<cmath>
 
-1542391457 source:c:\users\bojo2\desktop\pea\main.cpp
+1542396384 source:c:\users\bojo2\desktop\pea\main.cpp
 	<fstream>
 	<iostream>
 	<cmath>
+	<cstring>
+	<string>
+	<cstdlib>
+	<cstdio>
 

@@ -5,6 +5,7 @@
 #include <string>
 #include <cstdlib>
 #include <cstdio>
+
 int shortestdistance=INT_MAX;
 std::string shortestpath= "";
 
@@ -25,7 +26,7 @@ int  main()
         return 0;
     }
     distances = new int *[cityamount]; //tablica przechowujaca odleglosci miedzy miastami.
-    for(int i=0;i<cityamount;++i) //dwuwymiarowa tablica dynamiczna
+    for(int i=0;i<cityamount;++i) //dwuwymiarowa ta\blica dynamiczna
         distances[i]=new int[cityamount];
     for(int i=0;i<cityamount;++i) //zapelnianie tablicy danymi z pliku
         for(int j=0;j<cityamount;++j)
@@ -56,14 +57,18 @@ void recurency(int currentdistance, bool seen[], std::string path, int present, 
     for(int i=0;i<cityamount;++i)//sprawdzam czy jest jeszcze jakies nieodwiedzone miasto
         if(copyseen[i]==false)
         {
+            std::cout<<"\n\ndodaje dystans: distances["<<present<<"]["<<i<<"], czyli "<<distances[present][i]<<"\n\n";
             currentdistance+=distances[present][i]; // dodaje odleglosc z miasta obecnego do nastepnego
+            std::cout<<"\ncurrentdistance: "<<currentdistance<<"\n\n";
             previous = present;//w kolejnym poziomie rekurencji, poprzednie miasto bedzie obecnym
             present = i; // a miasto do ktorego bede szedl bedzie w kolejnym poziomie rekurencji obecnym
             copypath += 'A'+present; // dodaje obecne miasto do listy odwiedzonych juz miast
             std::cout<<"\ncopypath:"<<copypath<<"\n\n";
-            //std::cout<<"path:"<<path<<"\n\n";
             recurency(currentdistance, copyseen, copypath, present, previous); //wejdz do kolejnego miasta
             copypath = path;
+            present = previous;
+            currentdistance -= distances[present][i];
+            std::cout<<copypath<<" "<<path<<" "<<currentdistance<<'\n';\
         }
         //tutaj po powrocie z rekurencji z 4 poziomu na 3 moge sobie wszystko wypisac
 
