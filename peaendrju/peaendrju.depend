@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1542365024 source:c:\users\bojo2\desktop\pea\peaendrju\main.cpp
+	<fstream>
+	<iostream>
+	<cmath>
+
