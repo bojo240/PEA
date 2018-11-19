@@ -32,6 +32,11 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="bf.cpp" />
+		<Unit filename="bf.h" />
+		<Unit filename="bnb.cpp" />
+		<Unit filename="bnb.h" />
+		<Unit filename="comparator.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />

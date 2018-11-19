@@ -1,70 +1,52 @@
-#include <fstream>
 #include <iostream>
+#include <conio.h>
+#include "bnb.h"
+#include "comparator.h"
+#include "bf.h"
+#include <fstream>
 
-int shortestdistance=INT_MAX;
-std::string shortestpath;
-int cityamount;
-int **distances;
+void loadData(int, int**);                          // wczytywanie danych z pliku do tablicy
 
-void bruteForce(int, bool*, std::string, int, int, bool);
-
-int  main()
+int main()
 {
-    std::fstream plik;
-    plik.open("plik.txt",std::ios::in);
-    if(plik.good()) //zabezpieczenie
-        plik>>cityamount;
-    else
-        return 3;
-    distances = new int *[cityamount]; //tablica przechowujaca odleglosci miedzy miastami.
-    for(int i=0;i<cityamount;++i) //dwuwymiarowa ta\blica dynamiczna
-        distances[i]=new int[cityamount];
-    for(int i=0;i<cityamount;++i) //zapelnianie tablicy danymi z pliku
-        for(int j=0;j<cityamount;++j)
-            plik>>distances[i][j];
-    plik.close();
-    bool* c = new bool[cityamount]; //tworze tablice z miastami ktore odwiedzilem
-    for (int i=0;i<cityamount;++i)
-        c[i]=false;
-//    for (int i=0;i<cityamount;++i)
-//        distances[i][i] = 0;
-
-    bruteForce(0, c, "", 0, -1, true);
-    std::cout<<"Najkrotsza droga przez wszystkie miasta to: "<<shortestpath<<'\n';
-    std::cout<<"Jej calkowity dystans wynosi: "<<shortestdistance;
-}
-
-void bruteForce(int currentdistance, bool seen[], std::string path, int present, int previous, bool init)
-{
-    std::string copypath = path;
-    if (copypath.length()==2)
-        std::cout<<copypath<<'\n';
-    for(int i=0;i<cityamount;++i)//sprawdzam czy jest jeszcze jakies nieodwiedzone miasto
-        if(seen[i]==false)
-        {
-            if(previous>=0)
-                currentdistance+=distances[present][i]; // dodaje odleglosc z miasta obecnego do nastepnego
-            previous = present;//w kolejnym poziomie rekurencji, poprzednie miasto bedzie obecnym
-            present = i; // a miasto do ktorego bede szedl bedzie w kolejnym poziomie rekurencji obecnym
-            seen[present]=true; //zaznaczam miasto jako odwiedzone
-            copypath += 'A'+present; // dodaje obecne miasto do listy odwiedzonych juz miast
-            bruteForce(currentdistance, seen, copypath, present, previous, false); //wejdz do kolejnego miasta
-            if(init)//jezeli to pierwsze wywolanie rekurencji
-                return;// to nie wchodz w kolejne miasta tylko wyjdz z niej
-            copypath = path;//przywroc zmiany
-            seen[present] = false;
-            present = previous;
-            currentdistance -= distances[present][i];
-        }
-    if(path.length()==cityamount)//jezeli jestes na najnizszym z mozliwych poziomow rekurencji
+    int choice = 3;
+    while(choice!=0)
     {
-        copypath += copypath[0];        //dodaje pierwsze miasto do sciezki
-        char c = copypath[0];
-        currentdistance += distances[present][c-'A'];
-        if(currentdistance<shortestdistance) //jezeli ta sciezka jest krotsza od najkrotszej dotychczas znalezionej, zamien wartosc najkrotszej sciezki na krotsza
+        std::cout<<"1. Brute Force.\n2. Branch & Bound.\n\n";
+        std::cout<<"Twoj wybor: ";
+        choice = getche();
+        switch(choice)
         {
-            shortestdistance=currentdistance;
-            shortestpath=copypath;
+            case 1:
+                executeBF();
+                break;
+            case 2:
+                executeBnB();
+                break;
+            default:
+                break;
         }
     }
 }
+
+void loadData(int cityamount, int **distances)      // wczytywanie danych z pliku do tablicy
+{
+    std::fstream file;
+    std::string fileName;
+    std::cout<<"Podaj nazwe pliku:";
+    std::cin>>fileName;
+    file.open(fileName,std::ios::in);
+    if(file.good())                                 // zabezpieczenie
+        file>>cityamount;
+    else
+        return;
+    distances = new int *[cityamount];              // tablica przechowujaca odleglosci miedzy miastami.
+    for(int i=0;i<cityamount;++i)                   // dwuwymiarowa tablica dynamiczna
+        distances[i]=new int[cityamount];
+    for(int i=0;i<cityamount;++i)                   // zapelnianie tablicy danymi z pliku
+        for(int j=0;j<cityamount;++j)
+            file>>distances[i][j];
+    file.close();
+}
+
+
