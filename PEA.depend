@@ -37,3 +37,34 @@
 	<iostream>
 	"main.h"
 
+1562593379 source:c:\users\bojo2\onedrive\desktop\pea\bf.cpp
+	<iostream>
+	<fstream>
+
+1562591724 c:\users\bojo2\onedrive\desktop\pea\bf.h
+
+1562588066 c:\users\bojo2\onedrive\desktop\pea\main.h
+	<iostream>
+	"main.h"
+
+1562591714 source:c:\users\bojo2\onedrive\desktop\pea\bnb.cpp
+	<iostream>
+	<queue>
+	<vector>
+	"bnb.h"
+	"comparator.h"
+	"main.h"
+
+1562591734 c:\users\bojo2\onedrive\desktop\pea\bnb.h
+
+1562588066 c:\users\bojo2\onedrive\desktop\pea\comparator.h
+	"bnb.h"
+
+1562590649 source:c:\users\bojo2\onedrive\desktop\pea\main.cpp
+	<iostream>
+	<conio.h>
+	"bf.h"
+	"bnb.h"
+	"comparator.h"
+	<fstream>
+

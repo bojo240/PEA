@@ -17,7 +17,7 @@ Node* newNode(Node*, int);                          // funkcja tworzaca nowego n
 
 void executeBnB()
 {
-    loadData(bnbcityamount, bnbdistances);          // wczytywanie danych z pliku
+    loadData();          // wczytywanie danych z pliku
     Node* root = new Node;                          // utworzenie node'a - roota, czyli pierwszego miasta
     root->city = 0;
     root->reducedMatrix = bnbdistances;             // dla pierwszego miasta oryginalna tablica to ta wczytana z pliku

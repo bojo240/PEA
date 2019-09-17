@@ -1,56 +1,86 @@
 #include <iostream>
-#include "bf.h"
-#include "main.h"
+#include <fstream>
+#include <ctime>
 
-int bfcityamount;                                   // ilosc miast
-int **bfdistances;                                  // tablica przechowujaca odleglosci miedzy miastami wczytane z pliku
-int shortestdistance=INT_MAX;
-std::string shortestpath;
+int bfcityamount;                           // ilosc miast
+int **bfdistances;                          // tablica przechowujaca odleglosci miedzy miastami
+int shortestdistance=INT_MAX;               // najkrotsza dotychczasowo odnaleziona odleglosc
+int *shortestpath;                          // najkrotsza dotychczasowo odnaleziona sciezka
+void bruteForce(int*, bool*, int);          // deklaracja funkcji rekurencyjnej
 
-void bruteForce(int, bool*, std::string, int, int, bool);
+void loadData()                             // wczytywanie danych z pliku do zmiennych
+{
+    std::fstream file;
+    std::string fileName;
+    std::cout<<"Podaj nazwe pliku:";
+    std::cin>>fileName;
+    file.open(fileName,std::ios::in);
+    if(file.good())
+        file>>bfcityamount;
+    else
+        return;
+    bfdistances = new int *[bfcityamount];
+    shortestpath = new int [bfcityamount+1];
+    for(int i=0;i<bfcityamount;++i)
+        bfdistances[i]=new int[bfcityamount];
+    for(int i=0;i<bfcityamount;++i)
+        for(int j=0;j<bfcityamount;++j)
+            file>>bfdistances[i][j];
+    file.close();
+}
 
 void executeBF()
 {
-    loadData(bfcityamount, bfdistances);
-    bool* c = new bool[bfcityamount];               //tworze tablice z miastami ktore odwiedzilem
-    for (int i=0;i<bfcityamount;++i)
-        c[i]=false;
-    bruteForce(0, c, "", 0, -1, true);
-    std::cout<<"Najkrotsza droga przez wszystkie miasta to: "<<shortestpath<<'\n';
-    std::cout<<"Jej calkowity dystans wynosi: "<<shortestdistance;
+    loadData();
+    int* sequence = new int[bfcityamount+1];// tablica z kolejnoscia dotychczasowo odwiedzonych miast
+    bool* city = new bool[bfcityamount];    // tablica z dotychczasowo odwiedzonymi miastami
+    for (int i=0;i<bfcityamount+1;++i)
+    {
+        sequence[i]=0;
+        city[i] = false;
+    }
+    city[0] = true;                         // zacznij od pierwszego miasta
+    std::clock_t start;                     // licz czas
+    double duration;
+    start = std::clock();
+    bruteForce(sequence, city, 0);          // wywolanie rekurencji
+    duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+    shortestpath[bfcityamount] = 0;         // wroc do pierwszego miasta
+    std::cout<<"Najkrotsza droga przez wszystkie miasta to: ";
+    for(int i=0;i<bfcityamount+1;++i)
+        std::cout<<char('A'+shortestpath[i])<<" ";
+    std::cout<<'\n';
+    std::cout<<"Jej calkowity dystans wynosi: "<<shortestdistance<<'\n';
+    std::cout << "Czas: "<< duration << " sekund.\n\n";
 }
 
-void bruteForce(int currentdistance, bool seen[], std::string path, int present, int previous, bool init)
+void bruteForce(int* sequence, bool* city, int visited)
 {
-    std::string copypath = path;
-    if (copypath.length()==2)
-        std::cout<<copypath<<'\n';
-    for(int i=0;i<bfcityamount;++i)                 //sprawdzam czy jest jeszcze jakies nieodwiedzone miasto
-        if(seen[i]==false)
-        {
-            if(previous>=0)
-                currentdistance+=bfdistances[present][i]; // dodaje odleglosc z miasta obecnego do nastepnego
-            previous = present;                     //w kolejnym poziomie rekurencji, poprzednie miasto bedzie obecnym
-            present = i;                            // a miasto do ktorego bede szedl bedzie w kolejnym poziomie rekurencji obecnym
-            seen[present]=true;                     //zaznaczam miasto jako odwiedzone
-            copypath += 'A'+present;                // dodaje obecne miasto do listy odwiedzonych juz miast
-            bruteForce(currentdistance, seen, copypath, present, previous, false); //wejdz do kolejnego miasta
-            if(init)                                //jezeli to pierwsze wywolanie rekurencji
-                return;                             // to nie wchodz w kolejne miasta tylko wyjdz z niej
-            copypath = path;                        //przywroc zmiany
-            seen[present] = false;
-            present = previous;
-            currentdistance -= bfdistances[present][i];
-        }
-    if(path.length()==bfcityamount)                 //jezeli jestes na najnizszym z mozliwych poziomow rekurencji
+    ++visited;                              // zwieksz licznik odwiedzonych miast
+    if(visited < bfcityamount)              // jezeli nie odwiedzone wszystkie miasta
     {
-        copypath += copypath[0];                    //dodaje pierwsze miasto do sciezki
-        char c = copypath[0];
-        currentdistance += bfdistances[present][c-'A'];
-        if(currentdistance<shortestdistance)        //jezeli ta sciezka jest krotsza od najkrotszej dotychczas znalezionej, zamien wartosc najkrotszej sciezki na krotsza
+        for (int i=0; i<bfcityamount;++i)
         {
-            shortestdistance=currentdistance;
-            shortestpath=copypath;
+            if(city[i] == false)            // to odwiedz kolejne
+            {
+                city[i] = true;
+                sequence[visited] = i;
+                bruteForce(sequence, city, visited);
+                city[i] = false;            // zaznacz z powrotem jako nieodwiedzone
+            }                               // licznik w petli gwarantuje ze dwa razy ta sama droga
+        }                                   // rekurencja nie pojdzie
+    }
+    if(visited == bfcityamount)             // jezeli odwiedziles wszystkie miasta
+    {
+        int distance = 0;
+        for (int i=0; i<bfcityamount-1;++i) //dodaj odleglosci
+            distance += bfdistances[sequence[i]][sequence[i+1]];
+        distance += bfdistances[sequence[bfcityamount-1]][0];//wroc do startowego miasta
+        if(distance<shortestdistance)       // jezeli znaleziona odleglosc jest krotsza od dotychczasowo najkrotszej
+        {                                   //zamien wartosc i sciezke
+            shortestdistance = distance;
+            for(int i=0;i<bfcityamount;++i)
+                shortestpath[i] = sequence[i];
         }
     }
 }
