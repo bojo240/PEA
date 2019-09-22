@@ -4,7 +4,7 @@
 
 int bfcityamount;                           // ilosc miast
 int **bfdistances;                          // tablica przechowujaca odleglosci miedzy miastami
-int shortestdistance=INT_MAX;               // najkrotsza dotychczasowo odnaleziona odleglosc
+int shortestdistance;               // najkrotsza dotychczasowo odnaleziona odleglosc
 int *shortestpath;                          // najkrotsza dotychczasowo odnaleziona sciezka
 void bruteForce(int*, bool*, int);          // deklaracja funkcji rekurencyjnej
 
@@ -31,6 +31,7 @@ void loadData()                             // wczytywanie danych z pliku do zmi
 
 void executeBF()
 {
+    shortestdistance = INT_MAX;
     loadData();
     int* sequence = new int[bfcityamount+1];// tablica z kolejnoscia dotychczasowo odwiedzonych miast
     bool* city = new bool[bfcityamount];    // tablica z dotychczasowo odwiedzonymi miastami
@@ -47,11 +48,19 @@ void executeBF()
     duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
     shortestpath[bfcityamount] = 0;         // wroc do pierwszego miasta
     std::cout<<"Najkrotsza droga przez wszystkie miasta to: ";
-    for(int i=0;i<bfcityamount+1;++i)
-        std::cout<<char('A'+shortestpath[i])<<" ";
+    for(int i=0;i<bfcityamount;++i)
+        std::cout<<char('A'+shortestpath[i])<<" -> ";
+    std::cout<<char('A'+shortestpath[bfcityamount]);
     std::cout<<'\n';
     std::cout<<"Jej calkowity dystans wynosi: "<<shortestdistance<<'\n';
     std::cout << "Czas: "<< duration << " sekund.\n\n";
+    for (int i=0;i<bfcityamount;++i)
+        delete[] bfdistances[i];
+    delete[] bfdistances;
+    delete[] shortestpath;
+    delete[] sequence;
+    delete[] city;
+
 }
 
 void bruteForce(int* sequence, bool* city, int visited)

@@ -11,4 +11,4 @@ struct Node
 
 void executeBnB();
 
-void loadData();
+void bnbloadData();
