@@ -1,7 +1,0 @@
-# depslib dependency file v1.0
-1542727065 source:c:\users\bojo2\desktop\pea\peabnb\main.cpp
-	<iostream>
-	<fstream>
-	<queue>
-	<vector>
-
