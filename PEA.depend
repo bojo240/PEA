@@ -37,18 +37,19 @@
 	<iostream>
 	"main.h"
 
-1569953751 source:c:\users\bojo2\onedrive\desktop\pea\bf.cpp
+1572900173 source:c:\users\bojo2\onedrive\desktop\pea\bf.cpp
 	<iostream>
 	<fstream>
 	<ctime>
+	<chrono>
 
-1569953847 c:\users\bojo2\onedrive\desktop\pea\bf.h
+1572894774 c:\users\bojo2\onedrive\desktop\pea\bf.h
 
 1562588066 c:\users\bojo2\onedrive\desktop\pea\main.h
 	<iostream>
 	"main.h"
 
-1569953709 source:c:\users\bojo2\onedrive\desktop\pea\bnb.cpp
+1571766909 source:c:\users\bojo2\onedrive\desktop\pea\bnb.cpp
 	<iostream>
 	<queue>
 	<vector>
@@ -58,12 +59,12 @@
 	"comparator.h"
 	"main.h"
 
-1569953667 c:\users\bojo2\onedrive\desktop\pea\bnb.h
+1569950067 c:\users\bojo2\onedrive\desktop\pea\bnb.h
 
-1569953419 c:\users\bojo2\onedrive\desktop\pea\comparator.h
+1571757940 c:\users\bojo2\onedrive\desktop\pea\comparator.h
 	"bnb.h"
 
-1562590649 source:c:\users\bojo2\onedrive\desktop\pea\main.cpp
+1572899451 source:c:\users\bojo2\onedrive\desktop\pea\main.cpp
 	<iostream>
 	<conio.h>
 	"bf.h"

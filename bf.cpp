@@ -1,11 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include <chrono>
 
 int bfcityamount;                           // ilosc miast
 int **bfdistances;                          // tablica przechowujaca odleglosci miedzy miastami
-int shortestdistance;               // najkrotsza dotychczasowo odnaleziona odleglosc
+int shortestdistance;                       // najkrotsza dotychczasowo odnaleziona odleglosc
 int *shortestpath;                          // najkrotsza dotychczasowo odnaleziona sciezka
+std::chrono::duration<double> diff = std::chrono::nanoseconds{0};
 
 void loadData()                             // wczytywanie danych z pliku do zmiennych
 {
@@ -28,22 +30,20 @@ void loadData()                             // wczytywanie danych z pliku do zmi
     file.close();
 }
 
-void bruteForce(int* sequence, bool* city, int visited)
-{
+void bruteForce(int* sequence, int* city, int visited)
+{                                           // mozna by w tym miejscu sprawdzic dotychczasow¹ d³ugosc sciezki,
+                                            // jezeli przekracza najkrotsze rozwi¹zanie to nie rozwijac tej œciezki.
     ++visited;                              // zwieksz licznik odwiedzonych miast
     if(visited < bfcityamount)              // jezeli nie odwiedzone wszystkie miasta
-    {
         for (int i=0; i<bfcityamount;++i)
-        {
-            if(city[i] == false)            // to odwiedz kolejne
+            if(city[i] == 0)            // to odwiedz kolejne
             {
-                city[i] = true;
+                city[i] = 1;
                 sequence[visited] = i;
                 bruteForce(sequence, city, visited);
-                city[i] = false;            // zaznacz z powrotem jako nieodwiedzone
+                city[i] = 0;            // zaznacz z powrotem jako nieodwiedzone
             }                               // licznik w petli gwarantuje ze dwa razy ta sama droga
-        }                                   // rekurencja nie pojdzie
-    }
+                                            // rekurencja nie pojdzie
     if(visited == bfcityamount)             // jezeli odwiedziles wszystkie miasta
     {
         int distance = 0;
@@ -64,23 +64,23 @@ void executeBF()
     shortestdistance = INT_MAX;
     loadData();
     int* sequence = new int[bfcityamount+1];// tablica z kolejnoscia dotychczasowo odwiedzonych miast
-    bool* city = new bool[bfcityamount];    // tablica z dotychczasowo odwiedzonymi miastami
+    int* city = new int[bfcityamount];    // tablica z dotychczasowo odwiedzonymi miastami
     for (int i=0;i<bfcityamount+1;++i)
     {
         sequence[i]=0;
-        city[i] = false;
+        city[i] = 0;
     }
-    city[0] = true;                         // zacznij od pierwszego miasta
+    city[0] = 1;                         // zacznij od pierwszego miasta
     std::clock_t start;                     // licz czas
     double duration;
     start = std::clock();
     bruteForce(sequence, city, 0);          // wywolanie rekurencji
     duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-    shortestpath[bfcityamount] = 0;         // wroc do pierwszego miasta
+    shortestpath[bfcityamount] = 0;
     std::cout<<"Najkrotsza droga przez wszystkie miasta to: ";
     for(int i=0;i<bfcityamount;++i)
-        std::cout<<char('A'+shortestpath[i])<<" -> ";
-    std::cout<<char('A'+shortestpath[bfcityamount]);
+        std::cout<<shortestpath[i]<<" -> ";
+    std::cout<<shortestpath[bfcityamount];
     std::cout<<'\n';
     std::cout<<"Jej calkowity dystans wynosi: "<<shortestdistance<<'\n';
     std::cout << "Czas: "<< duration << " sekund.\n\n";
@@ -92,3 +92,34 @@ void executeBF()
     delete[] city;
 }
 
+void executeBFPomiar()
+{
+    shortestdistance = INT_MAX;
+    int* sequence = new int[bfcityamount+1];// tablica z kolejnoscia dotychczasowo odwiedzonych miast
+    int* city = new int[bfcityamount];    // tablica z dotychczasowo odwiedzonymi miastami
+    for (int i=0;i<bfcityamount+1;++i)
+    {
+        sequence[i]=0;
+        city[i] = 0;
+    }
+    city[0] = 1;                         // zacznij od pierwszego miasta
+    auto t1 = std::chrono::high_resolution_clock::now();
+    bruteForce(sequence, city, 0);          // wywolanie rekurencji
+    auto t2 = std::chrono::high_resolution_clock::now();
+    diff += t2-t1;
+    for (int i=0;i<bfcityamount;++i)
+        delete[] bfdistances[i];
+    delete[] bfdistances;
+    delete[] shortestpath;
+    delete[] sequence;
+    delete[] city;
+}
+
+void pomiar()
+{
+    loadData();
+    int ilepomiarow = 100;
+    for(int i=0;i<ilepomiarow;++i)
+        executeBFPomiar();
+    std::cout<<std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count()/ilepomiarow<<'\n';
+}

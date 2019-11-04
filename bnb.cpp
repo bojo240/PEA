@@ -10,7 +10,7 @@
 /*
 1. BNB polega na odcinaniu rozwiazan/galezi, ktore na pewno nie zawieraja poprawnego rozwiazania.
 Aby okreslic, czy galaz nalezy odciac czy rozwijac, nalezy porownac dolne ograniczenie galezi
-z obecnym gornym ograniczeniem calego problemu.
+z obecnym gornym ograniczeniem calej instancji.
 
 Aby okreslic pierwsze dolne ograniczenie dla calego drzewa (korzenia) wystarczy zsumowac
 najmniejsze koszty przejscia miedzy miastami.
@@ -26,7 +26,7 @@ czyli koszt wyjscia z ostatniego miasta i wszystkich nieodwiedzonych
 2. Co jakis czas pojsc greedy algorytmem, wyrzucic z kolejki (i zwolnic pamiec) wszystko co ma za duza granice dolna.
 3. Dodac wszystkie mozliwe sciezki, jezeli ich koszt nie jest wiekszy od gornej granicy
 4. Jezeli przypadkiem doszedlem juz na sam dol, to update na granice gorna, znowu wyczyscic kolejke z niezawierajacych rozwiazania
-5. Jak kolejka pusta to koniec.
+5. Jak kolejka pusta to koniec (albo jezeli head kolejki zawiera wszystkie miasta i powrocilo do miasta poczatkowego).
 */
 
 int bnbcityamount;                                  // ilosc miast
@@ -41,23 +41,22 @@ Node::~Node()
 
 Node::reduce()
 {
-    if(level == bnbcityamount) // jezeli jestesmy na samym koncu, koszt redukcji to koszt podrozy z miasta koncowego do miasta poczatkowego
-    {
+    if(level == bnbcityamount)                      // jezeli jestesmy na samym koncu, koszt redukcji to koszt podrozy
+    {                                               // z miasta koncowego do miasta poczatkowego
         return bnbdistances[order[level-1]][0];
     }
-    else if (level == bnbcityamount-1) // jezeli zostalo jedno miasto do odwiedzenia, to zwrocmy koszt pojscia do niego i wrocenia do miasta poczatkowego
-    {
+    else if (level == bnbcityamount-1)              // jezeli zostalo jedno miasto do odwiedzenia, to zwrocmy koszt
+    {                                               // pojscia do niego i wrocenia do miasta poczatkowego
         int nextCity = 0;
         for(;nextCity<bnbcityamount;++nextCity)
-            if(!isAlreadyInOrder(nextCity))//jezeli miasta jeszcze nie odwiedzilismy
+            if(!isAlreadyInOrder(nextCity))         //jezeli miasta jeszcze nie odwiedzilismy
                 break;
         return bnbdistances[order[level-1]][nextCity] + bnbdistances[nextCity][0];
     }
     else
     {
-        //trzeba policzyc minimalne koszty wyjscia i wejscia do i z kazdego z wierzcholkow.
-        //ostatni odwiedzony nie moze pojsc do pierwszego, bo zamkneloby to cykl, ale kazdy inny juz moze(ktorys musi)
-        //wejsc do nieodwiedzonych mozemy tylko z nieodwiedzonych, a do miasta pierwszego z kazdego ale nie z ostatniego dotychczasowego
+        // trzeba policzyc minimalne koszty wyjscia i wejscia do i z kazdego z wierzcholkow.
+        // ostatni odwiedzony nie moze pojsc do pierwszego, bo zamkneloby to cykl, ale kazdy inny juz moze(ktorys musi)
         int* notVisited = new int[bnbcityamount - level + 1];
         int licznik = 0;
         for(int i=0;i<bnbcityamount;++i)
@@ -70,9 +69,9 @@ Node::reduce()
         for (int i=0;i<licznik;++i)
             if(bnbdistances[order[level-1]][notVisited[i]]<temp)
                 temp = bnbdistances[order[level-1]][notVisited[i]];
-        int reducecost = temp;                  // w tym momencie mamy koszt wyjscia z ostatniego miasta do nieodwiedzonych node'ow
-        notVisited[bnbcityamount - level] = 0;  // do tablicy przechowujaca nieodwiedzone node'y
-        ++licznik;                              //dodajemy pierwsze miasto i liczymy granice dla kazdego z nich
+        int reducecost = temp;                      // w tym momencie mamy koszt wyjscia z ostatniego miasta do nieodwiedzonych
+        notVisited[bnbcityamount - level] = 0;      // node'ow do tablicy przechowujaca nieodwiedzone node'y
+        ++licznik;                                  // dodajemy pierwsze miasto i liczymy granice dla kazdego z nich
         for(int i=0;i<licznik-1;++i)
         {
             temp = INT_MAX;
@@ -117,7 +116,7 @@ void greedyAlgorithm(Node* top)
     temp->order = new int[bnbcityamount];
     for (int i=0;i<top->level;++i)
         temp->order[i] = top->order[i];
-    for (int i=0;i<bnbcityamount - top->level;++i) // znajdz tyle miast ilu jeszcze nie odwiedziles
+    for (int i=0;i<bnbcityamount - top->level;++i)  // znajdz tyle miast ilu jeszcze nie odwiedziles
     {
         int city = 0;
         int tempcost = INT_MAX;
@@ -163,9 +162,9 @@ void executeBnB()
         {
             duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
             std::cout<<"Najkrotsza droga przez wszystkie miasta to: ";
-            for(int i=0;i<top->level-1;++i)        // wypisz potrzebne informacje
-                std::cout<<char('A'+top->order[i])<<" -> ";
-            std::cout<<char('A'+top->order[0])<<"\n";
+            for(int i=0;i<top->level-1;++i)         // wypisz potrzebne informacje
+                std::cout<<top->order[i]<<" -> ";
+            std::cout<<top->order[0]<<"\n";
             std::cout<<"Jej calkowity dystans wynosi:"<<top->cost<<'\n';
             std::cout << "Czas: "<< duration << " sekund.\n\n";
             delete top;
@@ -192,34 +191,34 @@ void executeBnB()
             q.push(top);
             continue;
         }
-        if(licznik % bnbcityamount == 0) // co jakis czas zapusc greedy algorithm
+        if(licznik % bnbcityamount == 0)            // co jakis czas zapusc greedy algorithm
             greedyAlgorithm(top);
-        for(int i=1;i<bnbcityamount;++i) // zawsze pomijaj pierwsze miasto bo od niego zaczynamy
-            if(!top->isAlreadyInOrder(i)) // jezeli miasta jeszcze nie ma
+        for(int i=1;i<bnbcityamount;++i)            // zawsze pomijaj pierwsze miasto bo od niego zaczynamy
+            if(!top->isAlreadyInOrder(i))           // jezeli miasta jeszcze nie ma
             {
-                Node* temp = new Node(top,i); // pojdz do niego
-                if(temp->lowerBound <= upperBound) // jezeli warto
-                    q.push(temp); // to dodaj go do kolejki
-                else // a jak nie
-                    delete temp; // to zwolnij po nim pamiec
+                Node* temp = new Node(top,i);       // pojdz do niego
+                if(temp->lowerBound <= upperBound)  // jezeli warto
+                    q.push(temp);                   // to dodaj go do kolejki
+                else                                // a jak nie
+                    delete temp;                    // to zwolnij po nim pamiec
             }
-        delete top; // zwolnij pamiec po rozwazonym juz nodzie
+        delete top;                                 // zwolnij pamiec po rozwazonym juz nodzie
         ++licznik;
     }
 }
 
-Node::Node(Node* previous, int city) // parametry to rodzic oraz miasto do ktorego wlasnie wchodzimy tworzac tego node'a
-{
-    level = previous->level + 1; // ilosc dot. odwiedzonych miast
-    order = new int[level]; // tablica przechowujaca sciezke, bazujaca na rodzicu
+Node::Node(Node* previous, int city)                // parametry to rodzic oraz miasto do ktorego wlasnie wchodzimy
+{                                                   // tworzac tego node'a
+    level = previous->level + 1;                    // ilosc dot. odwiedzonych miast
+    order = new int[level];                         // tablica przechowujaca sciezke, bazujaca na rodzicu
     for(int i=0; i<level-1;++i)
         order[i] = previous->order[i];
     order[level-1] = city;
     cost = previous->cost + bnbdistances[order[level - 2]][city]; // koszt dotychczasowej sciezki
-    lowerBound = cost + reduce();// dolne ograniczenie dla node'a to obecny koszt + minimalny koszt przejscia pozostalych miast i powrotu do miasta poczatkowego
-}
+    lowerBound = cost + reduce();                   // dolne ograniczenie dla node'a to obecny koszt + minimalny koszt
+}                                                   // przejscia pozostalych miast i powrotu do miasta poczatkowego
 
-bool Node::isAlreadyInOrder(int city) // metoda sprawdza czy zadane miasto zostalo juz odwiedzone
+bool Node::isAlreadyInOrder(int city)               // metoda sprawdza czy zadane miasto zostalo juz odwiedzone
 {
     for (int i=0;i<level;++i)
         if(city==order[i])
@@ -227,7 +226,7 @@ bool Node::isAlreadyInOrder(int city) // metoda sprawdza czy zadane miasto zosta
     return false;
 }
 
-void bnbloadData()                             // wczytywanie danych z pliku do zmiennych
+void bnbloadData()                                  // wczytywanie danych z pliku do zmiennych
 {
     std::fstream file;
     std::string fileName;

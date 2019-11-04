@@ -5,7 +5,11 @@ struct comparator                                   // objekt do porownywania no
 {
     bool operator()(const Node* first, const Node* second) const
     {
-        return first->lowerBound > second->lowerBound;          // zwraca wynik w postaci bool, porownuje czy koszt pierwszego
-    }                                               // przekazanego node'a jest wiekszy niz drugiego
+        if(first->lowerBound != second->lowerBound)
+            return first->lowerBound > second->lowerBound;          // zwraca wynik w postaci bool, porownuje czy koszt pierwszego
+        else
+            return first->level < second->level;
+    }                         // przekazanego node'a jest wiekszy niz drugiego, dzieki temu jest w stanie ustalic kolejnosc
+
 };
 
